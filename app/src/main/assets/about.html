@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>About — Dua &amp; Zikr</title>
+<style>
+  :root {
+    --bg:#f6f1e7; --surface:#fffdf8; --line:#e7ddc9;
+    --ink:#2a2419; --muted:#6c6555; --accent:#b18431; --accent-2:#8a6d3a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14110b; --surface:#1d1810; --line:#2e2718; --ink:#efe7d6; --muted:#a99f88; --accent:#d8ad5a; --accent-2:#c79a47; }
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; }
+  body {
+    background:var(--bg); color:var(--ink); min-height:100vh;
+    font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    line-height:1.65; padding:24px 18px calc(48px + env(safe-area-inset-bottom));
+    display:flex; justify-content:center;
+  }
+  .wrap { width:100%; max-width:760px; }
+  .top { display:flex; align-items:center; gap:12px; margin-bottom:22px; }
+  .back {
+    display:inline-flex; align-items:center; gap:7px; text-decoration:none;
+    color:var(--ink); border:1px solid var(--line); background:var(--surface);
+    border-radius:11px; padding:9px 14px; font-size:14px; font-weight:600;
+  }
+  .back:active { transform:scale(.96); }
+  h1 { font-size:22px; margin:0; color:var(--accent); }
+  .ver { color:var(--muted); font-size:13px; margin:2px 0 0; letter-spacing:.02em; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:20px 20px; margin:16px 0; }
+  .card h2 { font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin:0 0 10px; }
+  p { margin:0 0 12px; }
+  .ur { direction:rtl; text-align:right; font-family:"Scheherazade",serif; font-size:17px; line-height:1.95; }
+  .kv { display:grid; grid-template-columns:1fr auto; gap:7px 16px; font-size:14px; }
+  .kv span:nth-child(odd) { color:var(--muted); }
+  .kv span:nth-child(even) { font-weight:600; text-align:right; }
+  .badge { display:inline-block; margin-top:8px; font-size:12px; font-weight:700; color:var(--accent-2);
+           border:1px solid var(--line); border-radius:999px; padding:4px 11px; }
+  .note { color:var(--muted); font-size:13px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="javascript:history.length>1?history.back():location.href='index.html'">‹ Back</a>
+      <div>
+        <h1>Dua &amp; Zikr</h1>
+        <p class="ver">Version 00 Rev A Personal</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>About</h2>
+      <p>A calm, offline Islamic reading app for phones, tablets and Android&nbsp;TV. Content shows one
+        remembrance at a time with Arabic as the focus, optional transliteration, English and Urdu
+        translation, Qur’an pause-mark support, and a source reference.</p>
+      <p>Content is organised into three categories — Azkar, Dua and Kalima — and can be read as a mixed
+        flow or one category at a time. Every entry carries a source and a verification flag.</p>
+      <p>Prayer times use online calculation when connected. If accurate auto-location data is unavailable,
+        the ribbon shows <em>unavailable</em> or <em>last saved</em> instead of silently using a wrong city.</p>
+    </div>
+
+    <div class="card">
+      <h2>تعارف</h2>
+      <p class="ur">فون، ٹیبلٹ اور Android TV کے لیے ایک پرسکون، آف لائن اسلامی مطالعہ ایپ۔ ہر کارڈ میں عربی متن
+        مرکزی حیثیت رکھتا ہے، ساتھ میں اختیاری تلفظ، انگریزی اور اردو ترجمہ، قرآنی وقف علامات اور حوالہ شامل ہے۔</p>
+      <p class="ur">مواد تین بڑے زمروں — اذکار، دعا اور کلمہ — میں منظم ہے۔ ہر اندراج میں حوالہ اور تصدیقی نشان موجود ہے۔</p>
+    </div>
+
+    <div class="card">
+      <h2>Content status</h2>
+      <div class="kv" id="meta">
+        <span>Content version</span><span id="cv">—</span>
+        <span>Last updated</span><span id="lu">—</span>
+        <span>Canonical items</span><span id="ti">—</span>
+        <span>Section references</span><span id="di">—</span>
+      </div>
+      <span class="badge">Pending scholarly review</span>
+      <p class="note" style="margin-top:12px">Sources have not yet been confirmed by a qualified scholar; treat
+        the content as provisional until reviewed. Tajweed colouring is a conservative visual aid pending review.</p>
+    </div>
+  </div>
+
+  <script>
+    // Fill content stats from the bundled JSON; fails quietly when offline-unavailable.
+    (function () {
+      try {
+        fetch("content/content.json").then(function (r) { return r.json(); }).then(function (c) {
+          function set(id, v) { var el = document.getElementById(id); if (el && v != null && v !== "") el.textContent = v; }
+          set("cv", c.content_version);
+          set("lu", c.last_updated);
+          set("ti", c.total_items);
+          set("di", c.total_display_items);
+        }).catch(function () {});
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+{
+  "version_name": "Version 00 Rev A Personal",
+  "sections": [
+    {
+      "key": "quranic_duas",
+      "label": "Quranic Duas",
+      "type": "Dua",
+      "count": 43,
+      "label_ur": "قرآنی دعائیں",
+      "type_ur": "دعا"
+    },
+    {
+      "key": "daily_life_duas",
+      "label": "Daily Life Duas",
+      "type": "Dua",
+      "count": 41,
+      "label_ur": "روزمرہ دعائیں",
+      "type_ur": "دعا"
+    },
+    {
+      "key": "dua",
+      "label": "Dua",
+      "type": "Dua",
+      "count": 20,
+      "label_ur": "دعا",
+      "type_ur": "دعا"
+    },
+    {
+      "key": "morning_azkar",
+      "label": "Morning Azkar",
+      "type": "Azkar",
+      "count": 11,
+      "label_ur": "صبح کے اذکار",
+      "type_ur": "ذکر"
+    },
+    {
+      "key": "evening_azkar",
+      "label": "Evening Azkar",
+      "type": "Azkar",
+      "count": 5,
+      "label_ur": "شام کے اذکار",
+      "type_ur": "ذکر"
+    },
+    {
+      "key": "before_salah",
+      "label": "Before Salah",
+      "type": "Dua",
+      "count": 6,
+      "label_ur": "نماز سے پہلے",
+      "type_ur": "دعا"
+    },
+    {
+      "key": "in_salah",
+      "label": "Inside Salah",
+      "type": "Azkar",
+      "count": 25,
+      "label_ur": "نماز کے اندر",
+      "type_ur": "ذکر"
+    },
+    {
+      "key": "after_salah_azkar",
+      "label": "After Salah Azkar",
+      "type": "Azkar",
+      "count": 13,
+      "label_ur": "نماز کے بعد اذکار",
+      "type_ur": "ذکر"
+    },
+    {
+      "key": "before_sleep_azkar",
+      "label": "Before Sleep Azkar",
+      "type": "Azkar",
+      "count": 8,
+      "label_ur": "سونے سے پہلے اذکار",
+      "type_ur": "ذکر"
+    },
+    {
+      "key": "azkar",
+      "label": "Azkar",
+      "type": "Azkar",
+      "count": 5,
+      "label_ur": "اذکار",
+      "type_ur": "ذکر"
+    },
+    {
+      "key": "protection_ruqyah",
+      "label": "Protection and Ruqyah",
+      "type": "Azkar",
+      "count": 22,
+      "label_ur": "حفاظت اور رقیہ",
+      "type_ur": "ذکر"
+    },
+    {
+      "key": "istighfar",
+      "label": "Istighfar",
+      "type": "Istighfar",
+      "count": 13,
+      "label_ur": "استغفار",
+      "type_ur": "استغفار"
+    },
+    {
+      "key": "salawat",
+      "label": "Salawat",
+      "type": "Salawat",
+      "count": 14,
+      "label_ur": "درود و سلام",
+      "type_ur": "درود"
+    },
+    {
+      "key": "kalima",
+      "label": "Kalima",
+      "type": "Kalima",
+      "count": 6,
+      "label_ur": "کلمہ",
+      "type_ur": "کلمہ"
+    },
+    {
+      "key": "hajj_umrah",
+      "label": "Hajj & Umrah",
+      "type": "Guidance",
+      "count": 19,
+      "label_ur": "حج اور عمرہ",
+      "type_ur": "رہنمائی"
+    }
+  ],
+  "cities": [
+    "auto",
+    "riyadh",
+    "jeddah",
+    "makkah",
+    "madinah",
+    "dammam"
+  ],
+  "content_version": "00A-personal"
+}

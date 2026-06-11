@@ -1,0 +1,1444 @@
+/* ==========================================================================
+   Dua & Zikr — Version 00 Rev A Personal
+   Mobile / tablet / Android-TV Islamic reading interface.
+   Premium calm theme, Indo-Pak Arabic, elderly Easy View, D-pad ready.
+   ========================================================================== */
+
+/* ---- Fonts --------------------------------------------------------------- */
+@font-face { font-family:"Amiri"; src:url("fonts/Amiri-Regular.ttf") format("truetype"); font-weight:400; font-display:swap; }
+@font-face { font-family:"Amiri"; src:url("fonts/Amiri-Bold.ttf") format("truetype"); font-weight:700; font-display:swap; }
+@font-face { font-family:"Scheherazade"; src:url("fonts/ScheherazadeNew-Regular.ttf") format("truetype"); font-weight:400; font-display:swap; }
+@font-face { font-family:"Scheherazade"; src:url("fonts/ScheherazadeNew-Bold.ttf") format("truetype"); font-weight:700; font-display:swap; }
+@font-face { font-family:"ReemKufi"; src:url("fonts/ReemKufi.ttf") format("truetype"); font-weight:400 600; font-display:swap; }
+/* Indo-Pak Nastaliq (Noto Nastaliq Urdu, SIL OFL) */
+@font-face { font-family:"NastaliqUrdu"; src:url("fonts/NotoNastaliqUrdu-Regular.ttf") format("truetype"); font-weight:400 700; font-display:swap; }
+
+/* ---- Theme tokens -------------------------------------------------------- */
+:root,
+[data-theme="dark-ambient"] {
+  --bg:#0e1413; --bg-2:#131b1a; --surface:#18211f; --surface-2:#1f2a28; --line:#2a3633;
+  --arabic:#f4efe3; --translit:#c9b78c; --translation:#cfd6d2; --muted:#7d8a85;
+  --accent:#c9a85a; --accent-2:#8fcaa9; --progress:#c9a85a;
+  --chip-bg:rgba(201,168,90,.12); --chip-fg:#d8c089;
+  --shadow:0 18px 50px rgba(0,0,0,.45);
+  --hero-glow:radial-gradient(120% 80% at 50% 0%, rgba(201,168,90,.10), transparent 60%);
+  --geo-opacity:.05; --on-accent:#161003;
+}
+[data-theme="gold-navy"] {
+  --bg:#0a1428; --bg-2:#0e1c38; --surface:#11203f; --surface-2:#16294e; --line:#233a63;
+  --arabic:#fbf6e9; --translit:#e3c98a; --translation:#d4ddec; --muted:#8294b4;
+  --accent:#e6c168; --accent-2:#6f9bd8; --progress:#e6c168;
+  --chip-bg:rgba(230,193,104,.14); --chip-fg:#ecd494;
+  --shadow:0 18px 50px rgba(2,8,23,.55);
+  --hero-glow:radial-gradient(120% 80% at 50% 0%, rgba(230,193,104,.12), transparent 60%);
+  --geo-opacity:.06; --on-accent:#161003;
+}
+[data-theme="haram-light"] {
+  --bg:#f4efe6; --bg-2:#efe8db; --surface:#ffffff; --surface-2:#faf6ee; --line:#e2d8c6;
+  --arabic:#2a2418; --translit:#9a7b3c; --translation:#4a4536; --muted:#9c9583;
+  --accent:#b08828; --accent-2:#4f7d63; --progress:#b08828;
+  --chip-bg:rgba(176,136,40,.12); --chip-fg:#8a6a1e;
+  --shadow:0 16px 40px rgba(80,60,20,.14);
+  --hero-glow:radial-gradient(120% 80% at 50% 0%, rgba(176,136,40,.08), transparent 60%);
+  --geo-opacity:.05; --on-accent:#ffffff;
+}
+[data-theme="green-classic"] {
+  --bg:#0c1b14; --bg-2:#0f2218; --surface:#12281d; --surface-2:#173124; --line:#224534;
+  --arabic:#f3efe0; --translit:#d4b86a; --translation:#cbd8cd; --muted:#7c9483;
+  --accent:#d8b85e; --accent-2:#57b489; --progress:#d8b85e;
+  --chip-bg:rgba(216,184,94,.14); --chip-fg:#e0c47c;
+  --shadow:0 18px 50px rgba(0,0,0,.5);
+  --hero-glow:radial-gradient(120% 80% at 50% 0%, rgba(87,180,137,.10), transparent 60%);
+  --geo-opacity:.05; --on-accent:#161003;
+}
+[data-theme="high-contrast"] {
+  --bg:#000000; --bg-2:#000000; --surface:#0a0a0a; --surface-2:#161616; --line:#5a5a5a;
+  --arabic:#ffffff; --translit:#ffe14d; --translation:#ffffff; --muted:#d8d8d8;
+  --accent:#ffe14d; --accent-2:#6ad1ff; --progress:#ffe14d;
+  --chip-bg:#262100; --chip-fg:#ffe14d;
+  --shadow:0 0 0 rgba(0,0,0,0);
+  --hero-glow:none; --geo-opacity:0; --on-accent:#000000;
+}
+
+/* ---- Base ---------------------------------------------------------------- */
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body {
+  margin:0; padding:0; height:100%; width:100%; overflow:hidden;
+  background:var(--bg); color:var(--translation);
+  font-family:"Segoe UI","Helvetica Neue",system-ui,sans-serif;
+  -webkit-text-size-adjust:100%; overscroll-behavior:none;
+}
+body {
+  background:var(--hero-glow), linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  transition:background-color .4s ease;
+}
+button { font-family:inherit; color:inherit; cursor:pointer; border:none; background:none; }
+:focus-visible { outline:3px solid var(--accent); outline-offset:2px; border-radius:10px; }
+.tv-focus { outline:3px solid var(--accent) !important; outline-offset:3px; border-radius:12px; box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 35%, transparent); }
+.arabic { -webkit-user-select:text; user-select:text; }
+.hidden { display:none !important; }
+
+.bg-geometry {
+  position:fixed; inset:0; width:100%; height:100%; z-index:0;
+  opacity:var(--geo-opacity); pointer-events:none;
+  color:var(--accent);
+}
+
+/* ---- App shell ----------------------------------------------------------- */
+#app {
+  position:fixed; inset:0; z-index:1;
+  display:flex; flex-direction:column;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+
+/* ---- Top bar ------------------------------------------------------------- */
+.topbar { display:flex; align-items:center; gap:12px; padding:14px 18px 6px; direction:ltr; }
+.brand-mark { width:30px; height:30px; flex:0 0 auto; display:grid; place-items:center; }
+.brand-mark svg { width:30px; height:30px; }
+.section-pick {
+  flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:flex-start;
+  gap:1px; text-align:left; border-radius:12px; padding:4px 6px; direction:inherit;
+}
+.section-pick .eyebrow {
+  font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); font-weight:600;
+}
+.section-pick .current {
+  display:flex; align-items:center; gap:7px; font-family:"ReemKufi",sans-serif;
+  font-size:17px; color:var(--arabic); font-weight:500;
+  max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.section-pick .current .caret { color:var(--accent); font-size:11px; }
+.icon-btn {
+  width:44px; height:44px; flex:0 0 auto; display:grid; place-items:center; border-radius:12px;
+  color:var(--arabic); transition:background .2s ease, transform .1s ease;
+}
+.icon-btn:active { transform:scale(.92); }
+.icon-btn:hover { background:var(--surface-2); }
+.icon-btn svg { width:22px; height:22px; }
+.icon-btn.ghost svg { width:20px; height:20px; }
+
+/* ---- Prayer ribbon ------------------------------------------------------- */
+.prayer-ribbon {
+  position:relative; z-index:1; margin:4px 18px 0; padding:7px 14px;
+  display:flex; align-items:center; gap:10px;
+  background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  font-size:12.5px; color:var(--muted);
+}
+.prayer-ribbon.hide { display:none; }
+.prayer-ribbon .next { color:var(--accent); font-weight:700; }
+.prayer-ribbon .time { color:var(--arabic); font-weight:600; margin-left:auto; font-variant-numeric:tabular-nums; }
+.prayer-ribbon .approx { font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); border:1px solid var(--line); border-radius:6px; padding:1px 5px; }
+.prayer-ribbon .dot { width:4px; height:4px; border-radius:50%; background:var(--line); }
+
+/* ---- Reading stage ------------------------------------------------------- */
+.stage { position:relative; min-height:0; flex:1 1 auto; display:flex; align-items:stretch; justify-content:center; padding:10px 16px 4px; z-index:1; }
+.reader {
+  position:relative; width:100%; max-width:760px; display:flex; flex-direction:column;
+  background:var(--surface); border:1px solid var(--line); border-radius:22px;
+  box-shadow:var(--shadow); overflow:hidden;
+}
+.reader::before { content:""; position:absolute; top:0; left:24px; right:24px; height:2px; background:linear-gradient(90deg, transparent, var(--accent), transparent); opacity:.55; }
+.reader-scroll {
+  flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch; scrollbar-width:thin; scrollbar-color:var(--line) transparent;
+  padding:26px 26px 30px; display:flex; flex-direction:column; gap:18px;
+}
+.reader-scroll::-webkit-scrollbar { width:6px; }
+.reader-scroll::-webkit-scrollbar-thumb { background:var(--line); border-radius:6px; }
+.reader[data-size="short"] .reader-scroll,
+.reader[data-size="normal"] .reader-scroll { justify-content:safe center; }
+.reader[data-size="long"] .reader-scroll,
+.reader[data-size="very_long"] .reader-scroll { justify-content:flex-start; }
+/* Simple mode enlarges content; never center (it clips the top), always
+   top-align and keep it scrollable. */
+body.easy .reader-scroll { justify-content:flex-start !important; padding-top:20px; }
+
+/* meta row */
+.meta-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.chip { font-size:11px; font-weight:600; letter-spacing:.04em; padding:4px 11px; border-radius:999px; background:var(--chip-bg); color:var(--chip-fg); }
+.chip.type { background:transparent; color:var(--muted); border:1px solid var(--line); }
+.chip.repeat { background:transparent; color:var(--accent-2); border:1px solid var(--line); }
+.flow-tag { font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-2); font-weight:700; }
+.verify { margin-left:auto; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:5px; }
+.verify .v-dot { width:7px; height:7px; border-radius:50%; background:var(--accent-2); }
+.verify.quran .v-dot { background:var(--accent); }
+.verify.hadith .v-dot { background:var(--accent-2); }
+.verify.compilation .v-dot { background:#d98b5a; }
+.copy-btn { width:34px; height:34px; flex:0 0 auto; display:grid; place-items:center; border-radius:10px; color:var(--muted); border:1px solid var(--line); transition:color .2s, background .2s, transform .1s; }
+.copy-btn svg { width:16px; height:16px; }
+.copy-btn:hover { color:var(--accent); background:var(--surface-2); }
+.copy-btn:active { transform:scale(.9); }
+body.no-copy .copy-btn { display:none; }
+
+.item-title { font-family:"ReemKufi",sans-serif; font-weight:500; font-size:15px; color:var(--arabic); opacity:.92; margin:0; }
+
+/* Arabic hero — script-aware */
+.arabic {
+  direction:rtl; text-align:center; color:var(--arabic);
+  font-size:var(--ar-size, 34px); line-height:var(--ar-lh, 1.95);
+  word-break:keep-all; overflow-wrap:normal; letter-spacing:0; margin:4px 0;
+  font-family:"Scheherazade","Amiri",serif;
+}
+.arabic[data-script="indopak"] { font-family:"NastaliqUrdu","Scheherazade",serif; }
+.arabic[data-script="naskh"]   { font-family:"Scheherazade","Amiri",serif; }
+.reader[data-size="very_long"] .arabic { text-align:right; }
+
+.translit { font-style:italic; color:var(--translit); text-align:center; line-height:1.7; font-size:var(--tl-size, 16px); }
+.translation { color:var(--translation); text-align:center; line-height:1.7; font-size:var(--tr-size, 17px); }
+.reader[data-size="very_long"] .translit,
+.reader[data-size="very_long"] .translation { text-align:left; }
+.source-row { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:2px; }
+.reader[data-size="very_long"] .source-row { justify-content:flex-start; }
+.source { font-size:12.5px; color:var(--muted); border-top:1px solid var(--line); padding-top:12px; width:100%; text-align:center; }
+.reader[data-size="very_long"] .source { text-align:left; }
+
+/* scroll affordance */
+.scroll-hint {
+  position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
+  display:none; align-items:center; gap:5px; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--muted); pointer-events:none;
+  background:linear-gradient(180deg, transparent, var(--surface) 60%); padding:14px 14px 6px;
+}
+.reader.can-scroll .scroll-hint { display:flex; animation:bob 1.8s ease-in-out infinite; }
+@keyframes bob { 0%,100%{transform:translate(-50%,0)} 50%{transform:translate(-50%,4px)} }
+
+/* No-flash card changes: instant content swap avoids blinking on Android WebView/TV. */
+.reader-scroll.swap-out-left,
+.reader-scroll.swap-out-right,
+.reader-scroll.swap-in-left,
+.reader-scroll.swap-in-right { animation:none !important; opacity:1 !important; transform:none !important; }
+
+/* ---- Bottom bar: large, elderly-friendly nav ---------------------------- */
+.bottombar { display:flex; align-items:center; gap:14px; padding:8px 20px 16px; }
+.nav-btn {
+  min-height:60px; flex:0 0 auto; border-radius:16px; padding:0 18px;
+  display:flex; align-items:center; gap:8px;
+  background:var(--surface); border:1px solid var(--line); color:var(--arabic);
+  font-size:14px; font-weight:600; transition:transform .1s ease, background .2s, border-color .2s;
+}
+.nav-btn:active { transform:scale(.94); }
+.nav-btn:hover { background:var(--surface-2); border-color:var(--accent); }
+.nav-btn svg { width:24px; height:24px; }
+.nav-label { display:none; }
+@media (min-width:560px) { .nav-label { display:inline; } }
+.progress-wrap { flex:1 1 auto; display:flex; flex-direction:column; gap:6px; }
+.progress-track { height:5px; border-radius:5px; background:var(--line); overflow:hidden; }
+.progress-fill { height:100%; width:0; background:var(--progress); border-radius:5px; transition:width .3s ease; }
+.counter { display:flex; align-items:center; justify-content:space-between; font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums; }
+.counter .auto-flag { color:var(--accent); font-weight:700; opacity:0; transition:opacity .2s; }
+.counter .auto-flag.on { opacity:1; }
+
+/* ==========================  EASY VIEW  ================================== */
+body.easy .nav-btn { min-height:72px; font-size:17px; padding:0 24px; border-width:2px; }
+body.easy .nav-btn svg { width:30px; height:30px; }
+body.easy .reader-scroll { gap:24px; padding:30px 28px 34px; }
+body.easy .translit { font-size:calc(var(--tl-size, 16px) * 1.12); }
+body.easy .translation { font-size:calc(var(--tr-size, 17px) * 1.12); }
+body.easy .icon-btn { width:52px; height:52px; }
+body.easy .icon-btn svg { width:26px; height:26px; }
+body.easy .chip { font-size:13px; padding:5px 13px; }
+body.easy .section-pick .current { font-size:20px; }
+
+/* ============================  TABLET  ================================== */
+@media (min-width:680px) {
+  .topbar { padding:18px 28px 8px; }
+  .section-pick .current { font-size:19px; }
+  .reader-scroll { padding:40px 48px 44px; gap:22px; }
+  .prayer-ribbon { margin:6px 28px 0; font-size:13.5px; padding:9px 18px; }
+  .bottombar { padding:10px 30px 22px; }
+}
+@media (min-width:900px) and (orientation:landscape) {
+  .reader { max-width:1100px; }
+  .reader-scroll {
+    display:grid; grid-template-columns:1.35fr .9fr;
+    grid-template-areas:"meta meta" "arabic title" "arabic side";
+    grid-template-rows:auto auto auto; gap:10px 40px; align-content:start; padding:44px 52px;
+  }
+  .reader-scroll .meta-row { grid-area:meta; }
+  .reader-scroll .item-title { grid-area:title; align-self:end; }
+  .reader-scroll .arabic { grid-area:arabic; align-self:start; text-align:center; }
+  .reader-scroll .side-zone { grid-area:side; align-self:start; border-left:1px solid var(--line); padding-left:36px; display:flex; flex-direction:column; gap:16px; }
+  .reader-scroll .translit, .reader-scroll .translation { text-align:left; }
+  .reader-scroll .source { text-align:left; border-top:none; padding-top:0; }
+  .reader-scroll .source-row { justify-content:flex-start; }
+}
+@media not all and (min-width:900px) and (orientation:landscape) {
+  .side-zone { display:contents; }
+}
+@media (max-height:480px) {
+  .reader[data-size="short"] .reader-scroll,
+  .reader[data-size="normal"] .reader-scroll { justify-content:flex-start; }
+  .reader-scroll { padding:16px 24px 20px; gap:12px; }
+  .prayer-ribbon { margin:2px 16px 0; padding:5px 12px; }
+}
+
+/* ====================  ANDROID TV / LEANBACK  =========================== */
+body.tv { font-size:18px; }
+body.tv .topbar { padding:34px 56px 10px; gap:20px; }
+body.tv .section-pick .current { font-size:26px; }
+body.tv .section-pick .eyebrow { font-size:13px; }
+body.tv .icon-btn { width:60px; height:60px; }
+body.tv .icon-btn svg { width:30px; height:30px; }
+body.tv .prayer-ribbon { margin:8px 56px 0; font-size:18px; padding:12px 24px; }
+body.tv .stage { padding:18px 56px 8px; }
+body.tv .reader { max-width:1500px; border-radius:28px; }
+body.tv .reader-scroll { padding:46px 70px 52px; gap:26px; }
+body.tv .bottombar { padding:14px 56px 34px; gap:24px; }
+body.tv .nav-btn { min-height:84px; font-size:22px; padding:0 34px; border-width:2px; }
+body.tv .nav-btn svg { width:34px; height:34px; }
+body.tv .nav-label { display:inline; }
+body.tv .chip { font-size:15px; padding:6px 15px; }
+body.tv .item-title { font-size:22px; }
+body.tv .copy-btn { display:none; }      /* no clipboard need on TV */
+/* Strong, unmistakable D-pad focus from sofa distance */
+body.tv :focus, body.tv :focus-visible {
+  outline:4px solid var(--accent); outline-offset:4px; border-radius:14px;
+}
+body.tv .nav-btn:focus, body.tv .icon-btn:focus, body.tv .section-pick:focus {
+  background:var(--chip-bg); border-color:var(--accent);
+  box-shadow:0 0 0 4px var(--accent); transform:scale(1.04);
+}
+body.tv .reader:focus { outline:none; box-shadow:var(--shadow), 0 0 0 3px var(--accent); }
+body.tv .sec-item:focus { background:var(--chip-bg); outline:4px solid var(--accent); outline-offset:-2px; }
+
+/* ===== TV-only enhancements ===== */
+.tv-only { display:none; }
+body.tv .tv-only { display:flex; }
+
+/* Thick, glowing D-pad focus, visible from the sofa (programmatic .tv-focus + native) */
+body.tv .tv-focus, body.tv :focus-visible {
+  outline:5px solid var(--accent) !important; outline-offset:4px; border-radius:16px;
+  box-shadow:0 0 0 6px color-mix(in srgb, var(--accent) 40%, transparent) !important;
+}
+body.tv .nav-btn.tv-focus, body.tv .icon-btn.tv-focus, body.tv .section-pick.tv-focus {
+  background:var(--chip-bg); border-color:var(--accent); transform:scale(1.05);
+}
+body.tv .reader.tv-focus, body.tv .reader:focus, body.tv .reader:focus-visible {
+  outline:none !important; box-shadow:var(--shadow), 0 0 0 5px var(--accent) !important;
+}
+body.tv .prayer-ribbon.tv-focus {
+  border-color:var(--accent); box-shadow:0 0 0 5px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* Category chips pinned to the top of the reader card */
+body.tv .reader-scroll .meta-row {
+  position:sticky; top:0; z-index:4; background:var(--surface);
+  padding:4px 0 12px; margin-top:-2px; border-bottom:1px solid var(--line);
+}
+
+/* Larger progress bar + counter for 10-foot legibility */
+body.tv .progress-wrap { gap:10px; }
+body.tv .progress-track { height:10px; border-radius:10px; }
+body.tv .counter { font-size:18px; }
+body.tv .counter .auto-flag { font-size:15px; }
+
+/* Roomier prayer ribbon */
+body.tv .prayer-ribbon { border-radius:16px; }
+
+/* Easy View on TV: bigger touch/remote targets + breathing room */
+body.tv.easy .nav-btn { min-height:96px; font-size:24px; }
+body.tv.easy .reader-scroll { gap:30px; }
+
+/* ---- Sheets -------------------------------------------------------------- */
+.scrim { position:fixed; inset:0; background:rgba(0,0,0,.55); opacity:0; pointer-events:none; transition:opacity .25s ease; z-index:40; backdrop-filter:blur(2px); }
+.scrim.open { opacity:1; pointer-events:auto; }
+.sheet {
+  position:fixed; left:0; right:0; bottom:0; z-index:50; max-height:88vh;
+  display:flex; flex-direction:column; background:var(--surface);
+  border-top:1px solid var(--line); border-radius:24px 24px 0 0;
+  transform:translateY(102%); transition:transform .32s cubic-bezier(.4,0,.2,1);
+  box-shadow:var(--shadow); padding-bottom:env(safe-area-inset-bottom);
+}
+.sheet.open { transform:translateY(0); }
+.sheet-grab { width:42px; height:4px; border-radius:4px; background:var(--line); margin:12px auto 4px; }
+.sheet-head { display:flex; align-items:center; gap:12px; padding:6px 24px 12px; border-bottom:1px solid var(--line); }
+.sheet-head h2 { font-family:"ReemKufi",sans-serif; font-weight:500; font-size:18px; color:var(--arabic); margin:0; flex:1; }
+.sheet-body { overflow-y:auto; -webkit-overflow-scrolling:touch; padding:8px 0; }
+@media (min-width:900px) {
+  .sheet { left:auto; right:0; top:0; bottom:0; width:460px; max-height:none; border-radius:24px 0 0 24px; border-top:none; border-left:1px solid var(--line); transform:translateX(102%); }
+  .sheet.open { transform:translateX(0); }
+}
+body.tv .sheet { left:auto; right:0; top:0; bottom:0; width:620px; max-height:none; border-radius:24px 0 0 24px; transform:translateX(102%); }
+body.tv .sheet.open { transform:translateX(0); }
+body.tv .sheet-head h2 { font-size:26px; }
+
+/* section/view list */
+.sec-list { display:flex; flex-direction:column; padding:6px 12px 16px; }
+.sec-head { font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); font-weight:700; padding:14px 16px 6px; }
+.sec-item { display:flex; align-items:center; gap:12px; width:100%; padding:15px 16px; border-radius:14px; text-align:left; color:var(--translation); font-size:15.5px; }
+.sec-item:hover { background:var(--surface-2); }
+.sec-item.active { background:var(--chip-bg); color:var(--chip-fg); font-weight:600; }
+.sec-item .sec-name { flex:1; }
+.sec-item .sec-sub { font-size:12px; color:var(--muted); }
+.sec-item .sec-count { font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; background:var(--surface-2); border-radius:999px; padding:2px 9px; }
+.sec-item.active .sec-count { color:var(--chip-fg); }
+.sec-item.primary { border:1px solid var(--accent); }
+body.tv .sec-item { font-size:21px; padding:20px; }
+
+/* settings groups */
+.set-group { padding:14px 24px 6px; }
+.set-group > .grp-title { font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); font-weight:700; margin:4px 0 12px; }
+.set-row { display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--line); }
+.set-row:last-child { border-bottom:none; }
+.set-row .label { flex:1; }
+.set-row .label .name { font-size:15px; color:var(--arabic); }
+.set-row .label .desc { font-size:12px; color:var(--muted); margin-top:2px; line-height:1.4; }
+body.tv .set-row .label .name { font-size:20px; }
+body.tv .set-row .label .desc { font-size:15px; }
+
+/* toggle */
+.switch { position:relative; width:54px; height:32px; flex:0 0 auto; }
+.switch input { opacity:0; width:0; height:0; }
+.switch .track { position:absolute; inset:0; border-radius:32px; background:var(--surface-2); border:1px solid var(--line); transition:.2s; }
+.switch .track::after { content:""; position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:var(--muted); transition:.2s; }
+.switch input:checked + .track { background:var(--chip-bg); border-color:var(--accent); }
+.switch input:checked + .track::after { background:var(--accent); transform:translateX(22px); }
+.switch input:focus-visible + .track { outline:3px solid var(--accent); outline-offset:2px; }
+
+/* stepper */
+.stepper { display:flex; align-items:center; gap:10px; flex:0 0 auto; }
+.stepper button { width:40px; height:40px; border-radius:11px; background:var(--surface-2); border:1px solid var(--line); color:var(--arabic); font-size:20px; font-weight:700; display:grid; place-items:center; }
+.stepper button:active { transform:scale(.9); }
+.stepper .val { min-width:56px; text-align:center; font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; }
+
+/* segmented */
+.seg { display:flex; gap:6px; flex-wrap:wrap; flex:0 0 auto; }
+.seg button { padding:9px 14px; border-radius:11px; font-size:13px; background:var(--surface-2); border:1px solid var(--line); color:var(--translation); }
+.seg button.active { background:var(--chip-bg); border-color:var(--accent); color:var(--chip-fg); font-weight:600; }
+body.tv .seg button { font-size:17px; padding:12px 18px; }
+
+/* Arabic typeface dropdown */
+.set-select { flex:0 0 auto; min-width:172px; padding:9px 12px; border-radius:11px; font-size:13px;
+  background:var(--surface-2); border:1px solid var(--line); color:var(--translation); appearance:none; cursor:pointer; }
+.set-select:focus-visible { outline:none; border-color:var(--accent); box-shadow:0 0 0 2px var(--accent); }
+body.tv .set-select { font-size:17px; padding:12px 16px; min-width:240px; }
+
+/* Gentle entrance for the reading card (disabled when reduced motion is requested) */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes duaIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  .reader-scroll { animation:duaIn .42s ease both; }
+}
+
+/* theme swatches */
+.theme-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:4px 0 6px; }
+@media (min-width:520px) { .theme-grid { grid-template-columns:repeat(3,1fr); } }
+.theme-card { border-radius:14px; border:2px solid var(--line); padding:12px; display:flex; flex-direction:column; gap:9px; text-align:left; transition:border-color .2s; }
+.theme-card.active { border-color:var(--accent); }
+.theme-card .swatch { height:38px; border-radius:9px; position:relative; overflow:hidden; }
+.theme-card .swatch .a { position:absolute; inset:0; }
+.theme-card .swatch .b { position:absolute; right:8px; top:8px; bottom:8px; width:30%; border-radius:6px; }
+.theme-card .tname { font-size:12.5px; color:var(--arabic); }
+
+/* about */
+.about { padding:6px 24px 18px; color:var(--muted); font-size:13px; line-height:1.6; }
+.about strong { color:var(--arabic); }
+.about .badge { display:inline-block; margin-top:8px; padding:4px 10px; border-radius:8px; background:var(--chip-bg); color:var(--chip-fg); font-size:11.5px; font-weight:600; }
+.about .kv { margin-top:10px; display:grid; grid-template-columns:auto 1fr; gap:4px 14px; font-size:12.5px; }
+.about .kv span:nth-child(odd) { color:var(--arabic); }
+
+/* sticky Save & Apply */
+.sheet-foot { position:sticky; bottom:0; padding:14px 24px calc(14px + env(safe-area-inset-bottom)); background:linear-gradient(180deg, transparent, var(--surface) 30%); border-top:1px solid var(--line); }
+.btn-apply { width:100%; min-height:60px; border-radius:16px; background:var(--accent); color:var(--on-accent); font-size:17px; font-weight:700; letter-spacing:.02em; display:grid; place-items:center; transition:transform .1s ease, filter .2s; }
+.btn-apply:active { transform:scale(.985); filter:brightness(1.05); }
+body.tv .btn-apply { min-height:78px; font-size:22px; }
+.btn-about { width:100%; min-height:48px; border-radius:12px; background:var(--surface-2); color:var(--arabic);
+  border:1px solid var(--line); font-size:15px; font-weight:600; display:grid; place-items:center; transition:transform .1s ease, background .2s; }
+.btn-about:active { transform:scale(.98); }
+.btn-about:hover { background:var(--chip-bg); }
+
+/* toast */
+.toast { position:fixed; left:50%; bottom:calc(28px + env(safe-area-inset-bottom)); transform:translate(-50%,20px); z-index:80; background:var(--surface-2); color:var(--arabic); border:1px solid var(--line); border-radius:12px; padding:12px 20px; font-size:14px; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; }
+.toast.show { opacity:1; transform:translate(-50%,0); }
+body.tv .toast { font-size:20px; padding:16px 28px; }
+
+/* splash */
+#splash { position:fixed; inset:0; z-index:100; display:grid; place-items:center; background:var(--bg); transition:opacity .5s ease; }
+#splash.gone { opacity:0; pointer-events:none; }
+#splash .mark { width:76px; height:76px; animation:pulse 2.2s ease-in-out infinite; }
+#splash .name { margin-top:18px; font-family:"ReemKufi",sans-serif; color:var(--arabic); font-size:19px; letter-spacing:.04em; }
+#splash .ar { margin-top:6px; font-family:"Scheherazade",serif; color:var(--accent); font-size:24px; }
+@keyframes pulse { 0%,100%{opacity:.6; transform:scale(.97)} 50%{opacity:1; transform:scale(1.03)} }
+
+@media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
+
+/* ==========================================================================
+   Rev-A visual uplift (Dua & Zikr) — additive, theme-token driven.
+   Depth, atmosphere, and calmer motion. No layout/structure changes.
+   ========================================================================== */
+
+/* Layered atmosphere: a soft top glow + corner light + gentle vignette,
+   composited behind the app shell. Pure decoration, never interactive. */
+body::after {
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(70% 45% at 50% -8%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 62%),
+    radial-gradient(45% 35% at 92% 8%, color-mix(in srgb, var(--accent-2) 10%, transparent), transparent 60%),
+    radial-gradient(120% 100% at 50% 120%, color-mix(in srgb, var(--bg) 0%, transparent), color-mix(in srgb, #000 26%, transparent) 100%);
+}
+[data-theme="high-contrast"] body::after { background:none; }
+
+/* Denser, edge-faded geometry so the backdrop reads as texture, not noise. */
+.bg-geometry {
+  opacity:calc(var(--geo-opacity) * 1.5);
+  -webkit-mask-image:radial-gradient(120% 90% at 50% 18%, #000 38%, transparent 86%);
+          mask-image:radial-gradient(120% 90% at 50% 18%, #000 38%, transparent 86%);
+}
+
+/* Reading card: more depth, a luminous gold hairline, subtle surface gradient,
+   and a calm entrance each time an item mounts. */
+.reader {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 60%, var(--surface)) 0%, var(--surface) 46%);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--accent) 22%, transparent) inset,
+    0 28px 70px -28px rgba(0,0,0,.6),
+    var(--shadow);
+  animation:reader-rise .5s cubic-bezier(.2,.7,.2,1) both;
+}
+.reader::before { opacity:.7; height:2px; filter:drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 60%, transparent)); }
+@keyframes reader-rise { from { opacity:0; transform:translateY(10px) scale(.992); } to { opacity:1; transform:none; } }
+[data-theme="high-contrast"] .reader { animation:none; background:var(--surface); }
+
+/* Prayer ribbon: a touch of gradient + a soft accent edge + glowing next label. */
+.prayer-ribbon {
+  background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 6%, var(--surface)), var(--surface));
+  border-color:color-mix(in srgb, var(--accent) 24%, var(--line));
+  box-shadow:0 8px 24px -16px rgba(0,0,0,.7);
+}
+.prayer-ribbon .next { text-shadow:0 0 14px color-mix(in srgb, var(--accent) 45%, transparent); }
+.prayer-ribbon .dot  { background:color-mix(in srgb, var(--accent) 55%, var(--line)); }
+
+/* Chips & verification: slightly softer, with a hairline ring for definition. */
+.chip { box-shadow:0 0 0 1px color-mix(in srgb, var(--chip-fg) 18%, transparent) inset; }
+.verify .v-dot { box-shadow:0 0 8px color-mix(in srgb, currentColor 0%, transparent); }
+
+/* Stronger, friendlier focus ring for D-pad / TV. */
+:focus-visible { outline:3px solid var(--accent); outline-offset:3px;
+  box-shadow:0 0 0 6px color-mix(in srgb, var(--accent) 22%, transparent); border-radius:12px; }
+
+/* Brand mark gets a faint halo so it feels crafted, not flat. */
+.brand-mark svg { filter:drop-shadow(0 2px 6px color-mix(in srgb, var(--accent) 40%, transparent)); }
+
+/* Respect reduced-motion preferences. */
+@media (prefers-reduced-motion:reduce) {
+  .reader { animation:none; }
+}
+
+/* ==========================================================================
+   Rev-B: brief Bismillah splash, English/Urdu, stronger Simple mode.
+   ========================================================================== */
+
+/* Splash now leads with the Basmala; the name sits quietly beneath it. */
+#splash .ar {
+  margin-top:20px; font-family:"ScheherazadeNew","Amiri",serif; color:var(--accent);
+  font-size:30px; line-height:1.7; letter-spacing:.01em; direction:rtl;
+  text-shadow:0 0 26px color-mix(in srgb, var(--accent) 40%, transparent);
+  animation:bismillah-in .9s ease both;
+}
+#splash .name {
+  margin-top:12px; font-family:"ReemKufi",sans-serif; color:var(--muted);
+  font-size:14px; letter-spacing:.18em; text-transform:uppercase;
+}
+@keyframes bismillah-in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+/* Urdu reading text: simple, easy Naskh (Scheherazade) for clear legibility. */
+.translation.ur-text {
+  font-family:"Scheherazade","NastaliqUrdu", serif; line-height:1.95; font-size:calc(var(--tr-size, 17px) * 1.12);
+  text-align:right; direction:rtl;
+}
+body.easy .translation.ur-text { line-height:2.05; }
+
+/* In Urdu (RTL) layout, keep Latin transliteration and source left-to-right. */
+body[data-lang="ur"] .translit,
+body[data-lang="ur"] .source,
+body[data-lang="ur"] .stepper .val { direction:ltr; }
+/* Urdu interface strings render via the platform Arabic font; nudge size up
+   slightly for legibility (helpful for elderly users). */
+body[data-lang="ur"] { font-feature-settings:"kern" 1; }
+body[data-lang="ur"] .section-pick .current,
+body[data-lang="ur"] .sheet-head h2,
+body[data-lang="ur"] .nav-label,
+body[data-lang="ur"] .row-name { font-size:1.06em; }
+
+/* Stronger "Simple mode" (easy) for elderly operation:
+   larger hero, bigger nav with always-visible labels, calmer density. */
+body.easy .arabic { line-height:2 !important; }
+body.easy .nav-btn { min-height:80px; font-size:19px; gap:10px; border-width:2px; }
+body.easy .nav-btn .nav-label { display:inline; font-weight:700; }
+body.easy .item-title { font-size:1.25em; }
+body.easy .meta-row .chip.type,
+body.easy .meta-row .flow-tag { display:none; }   /* less clutter */
+body.easy .prayer-ribbon { font-size:15px; padding:11px 18px; }
+body.easy .reader { border-width:2px; }
+
+/* ---- Browse-sheet search (find any du'a by name) ----------------------- */
+.sec-search {
+  width:100%; box-sizing:border-box; margin:0 0 12px;
+  background:var(--surface-2); color:var(--arabic);
+  border:1px solid var(--line); border-radius:12px;
+  padding:13px 15px; font-size:15px; font-family:inherit;
+}
+.sec-search::placeholder { color:var(--muted); }
+.sec-search:focus { outline:none; border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.sec-empty { color:var(--muted); text-align:center; padding:22px 0; font-size:14px; }
+body.easy .sec-search { font-size:18px; padding:16px; }
+
+/* ---- Live-location note ------------------------------------------------ */
+.loc-note { color:var(--accent-2); font-size:13px; line-height:1.5;
+  background:color-mix(in srgb, var(--accent-2) 10%, transparent);
+  border:1px solid color-mix(in srgb, var(--accent-2) 24%, var(--line));
+  border-radius:10px; padding:9px 12px; }
+
+
+/* ===========================================================================
+   Version 00 Rev A Personal — premium adaptive reading system
+   - Serene futuristic dark palette with soft-gold / blue accents
+   - Sticky category tags inside the reader
+   - Elder-friendly Simple mode
+   - 10-foot Android TV scaling and stronger focus indicators
+   =========================================================================== */
+
+[data-theme="dark-ambient"] {
+  --bg:#050a12; --bg-2:#08111f; --surface:#0d1726; --surface-2:#13223a; --line:#243552;
+  --arabic:#fff8e8; --translit:#e8c875; --translation:#d9e7ee; --muted:#9aaeBC;
+  --accent:#f0c96a; --accent-2:#62c8ff; --progress:#f0c96a;
+  --chip-bg:rgba(98,200,255,.12); --chip-fg:#b7e8ff;
+  --shadow:0 28px 90px rgba(0,0,0,.62);
+  --hero-glow:
+    radial-gradient(80% 58% at 50% -16%, rgba(98,200,255,.16), transparent 62%),
+    radial-gradient(62% 45% at 90% 5%, rgba(240,201,106,.12), transparent 62%);
+  --geo-opacity:.075; --on-accent:#08111f;
+}
+
+body {
+  background:
+    radial-gradient(90% 70% at 50% -10%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent 60%),
+    radial-gradient(90% 80% at 120% 8%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 64%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+}
+
+.reader {
+  border-radius:clamp(22px, 4vw, 42px);
+  border-color:color-mix(in srgb, var(--accent-2) 18%, var(--line));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 52%, transparent) 0%, var(--surface) 52%),
+    radial-gradient(90% 45% at 50% 0%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 64%);
+  backdrop-filter:blur(16px) saturate(1.12);
+  -webkit-backdrop-filter:blur(16px) saturate(1.12);
+}
+
+.reader-scroll {
+  padding:clamp(22px, 4.8vw, 52px);
+  gap:clamp(18px, 2.8vw, 34px);
+  scroll-padding-top:92px;
+}
+
+.meta-row {
+  position:sticky;
+  top:0;
+  z-index:6;
+  margin:calc(clamp(22px, 4.8vw, 52px) * -1) calc(clamp(22px, 4.8vw, 52px) * -1) 2px;
+  padding:clamp(14px, 2.5vw, 24px) clamp(22px, 4.8vw, 52px) clamp(12px, 2vw, 20px);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 94%, transparent) 0%, color-mix(in srgb, var(--surface) 82%, transparent) 72%, transparent 100%);
+  border-bottom:1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  backdrop-filter:blur(18px) saturate(1.1);
+  -webkit-backdrop-filter:blur(18px) saturate(1.1);
+}
+
+.chip {
+  min-height:32px;
+  display:inline-flex;
+  align-items:center;
+  font-size:clamp(11px, 1.5vw, 14px);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.item-title {
+  font-size:clamp(16px, 2.6vw, 24px);
+  letter-spacing:.01em;
+  color:color-mix(in srgb, var(--arabic) 94%, var(--accent));
+}
+
+.arabic {
+  text-shadow:0 1px 0 rgba(0,0,0,.18);
+  margin-top:2px;
+}
+
+.translit {
+  border-top:1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+  padding-top:clamp(16px, 2.5vw, 26px);
+}
+
+.translation {
+  max-width:70ch;
+  margin-inline:auto;
+}
+
+.prayer-ribbon {
+  border-radius:999px;
+  min-height:48px;
+  padding-inline:clamp(16px, 4vw, 34px);
+}
+
+.icon-btn, .nav-btn, .section-pick, .sec-item, .theme-card, .btn-apply {
+  touch-action:manipulation;
+}
+
+:focus-visible,
+body.tv :focus-visible {
+  outline:4px solid var(--accent-2);
+  outline-offset:4px;
+  box-shadow:0 0 0 8px color-mix(in srgb, var(--accent-2) 22%, transparent), 0 0 30px color-mix(in srgb, var(--accent-2) 24%, transparent);
+}
+
+body.easy .reader-scroll {
+  padding:clamp(28px, 6vw, 64px);
+  gap:clamp(24px, 4vw, 44px);
+}
+body.easy .meta-row {
+  margin:calc(clamp(28px, 6vw, 64px) * -1) calc(clamp(28px, 6vw, 64px) * -1) 4px;
+  padding:clamp(18px, 3.5vw, 32px) clamp(28px, 6vw, 64px) clamp(16px, 3vw, 28px);
+}
+body.easy .chip { min-height:40px; font-size:15px; padding-inline:16px; }
+body.easy .copy-btn { width:48px; height:48px; }
+body.easy .translation, body.easy .translit { line-height:1.9; }
+body.easy .item-title { font-size:clamp(20px, 4vw, 30px); }
+
+@media (min-width: 900px) {
+  .reader { max-width:min(1120px, 84vw); }
+  .stage { padding-inline:clamp(28px, 5vw, 80px); }
+  .bottombar { max-width:min(1120px, 84vw); margin-inline:auto; width:100%; }
+}
+
+@media (min-width: 1280px), (min-height: 800px) and (min-width: 900px) {
+  .topbar { padding:clamp(24px, 3vw, 42px) clamp(34px, 5vw, 72px) 12px; }
+  .brand-mark, .brand-mark svg { width:48px; height:48px; }
+  .section-pick .eyebrow { font-size:14px; }
+  .section-pick .current { font-size:clamp(28px, 2.8vw, 42px); }
+  .icon-btn { width:72px; height:72px; border-radius:22px; }
+  .icon-btn svg { width:34px; height:34px; }
+  .prayer-ribbon { margin-inline:clamp(34px, 5vw, 72px); min-height:68px; font-size:clamp(18px, 1.5vw, 24px); }
+  .reader { max-width:min(1360px, 86vw); }
+  .reader-scroll { padding:clamp(44px, 5vw, 82px); }
+  .meta-row {
+    margin:calc(clamp(44px, 5vw, 82px) * -1) calc(clamp(44px, 5vw, 82px) * -1) 8px;
+    padding:clamp(24px, 3vw, 42px) clamp(44px, 5vw, 82px) clamp(18px, 2.4vw, 34px);
+  }
+  .chip { min-height:46px; padding-inline:22px; font-size:18px; }
+  .copy-btn { width:62px; height:62px; border-radius:18px; }
+  .copy-btn svg { width:28px; height:28px; }
+  .item-title { font-size:clamp(28px, 2.3vw, 42px); }
+  .bottombar { max-width:min(1360px, 86vw); padding-block:18px 32px; }
+  .nav-btn { min-width:132px; min-height:104px; border-radius:30px; }
+  .nav-btn svg { width:42px; height:42px; }
+  .nav-label { display:inline; font-size:20px; }
+  .progress-wrap { max-width:520px; }
+  .progress-track { height:13px; border-radius:999px; }
+  .counter { font-size:20px; }
+  .sheet { max-width:min(760px, 60vw); border-radius:36px 36px 0 0; }
+  .sheet-head h2 { font-size:34px; }
+  .sec-item { min-height:82px; font-size:24px; }
+  .row-name { font-size:22px; }
+  .row-desc { font-size:18px; }
+}
+
+body.tv .reader { max-width:1500px; }
+body.tv .reader-scroll { scroll-padding-top:140px; }
+body.tv .meta-row { min-height:92px; }
+body.tv .arabic { letter-spacing:.01em; }
+body.tv .translit { font-size:calc(var(--tl-size, 18px) * 1.22); }
+body.tv .translation { font-size:calc(var(--tr-size, 18px) * 1.22); line-height:1.85; }
+body.tv .sheet { max-width:900px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .reader-scroll.swap-in-left, .reader-scroll.swap-in-right { animation:calm-in .28s ease both; }
+  @keyframes calm-in { from { opacity:.2; transform:translateY(8px); } to { opacity:1; transform:none; } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior:auto !important; }
+  .reader, .reader-scroll, #splash .mark, #splash .ar { animation:none !important; transition:none !important; }
+}
+
+/* ========================================================================
+   Version 00 Rev A Personal — Elder Ease + Waqf support
+   ======================================================================== */
+[data-theme="elder-dark"] {
+  --bg:#080d13; --bg-2:#101820; --surface:#131a22; --surface-2:#1d2630; --line:#33404c;
+  --arabic:#ffffff; --translit:#f1c65c; --translation:#f7f4eb; --muted:#c4cbd1;
+  --accent:#8fa95a; --accent-2:#e0bd63; --progress:#e0bd63; --chip-bg:#1d2630; --chip-fg:#f1c65c;
+  --shadow:0 20px 70px rgba(0,0,0,.55); --hero-glow:radial-gradient(90% 60% at 50% 0%, rgba(143,169,90,.12), transparent 62%);
+  --geo-opacity:.035; --on-accent:#07100b;
+}
+[data-theme="elder-light"] {
+  --bg:#f6f1e6; --bg-2:#efe7d6; --surface:#fffaf0; --surface-2:#f3eadb; --line:#d9cbb4;
+  --arabic:#101820; --translit:#7a5a19; --translation:#17202b; --muted:#52606b;
+  --accent:#728842; --accent-2:#b18431; --progress:#728842; --chip-bg:#e8dcc7; --chip-fg:#5f6f32;
+  --shadow:0 18px 60px rgba(61,45,20,.18); --hero-glow:radial-gradient(90% 70% at 50% 0%, rgba(177,132,49,.11), transparent 70%);
+  --geo-opacity:.045; --on-accent:#ffffff;
+}
+
+/* Clean selected design: no floating category chips or top source strip. */
+.section-pick .eyebrow { display:none !important; }
+.topbar { padding:16px 20px 8px; gap:10px; }
+.brand-mark { display:none; }
+.section-pick { padding:4px 2px; }
+body[data-lang="ur"] .section-pick { text-align:right; align-items:flex-end; direction:rtl; }
+body[data-lang="ur"] .sheet, body[data-lang="ur"] .sheet-body, body[data-lang="ur"] .set-row, body[data-lang="ur"] .about { direction:rtl; text-align:right; }
+body[data-lang="ur"] .seg, body[data-lang="ur"] .stepper, body[data-lang="ur"] select { direction:rtl; }
+.section-pick .current { font-size:clamp(24px, 5.8vw, 38px); line-height:1.1; color:var(--arabic); font-weight:800; letter-spacing:-.02em; }
+.section-pick .current .caret { display:none; }
+.prayer-ribbon { margin:0 20px 8px; min-height:42px; border-radius:10px; font-size:15px; background:linear-gradient(180deg, var(--surface-2), var(--surface)); }
+.prayer-ribbon .approx { display:none; }
+.prayer-ribbon .time { font-size:16px; }
+.stage { padding:6px 18px 0; }
+.reader { max-width:860px; border-radius:20px; background:transparent; border:none; box-shadow:none; overflow:visible; }
+.reader::before { display:none; }
+.reader-scroll { padding:0; gap:10px; overflow-y:auto; }
+.meta-row { display:none !important; }
+.item-title { font-size:clamp(19px, 4.8vw, 30px); font-weight:750; margin:0 0 6px; color:var(--arabic); }
+.arabic, .translit, .translation, .source-row { border:1px solid var(--line); background:linear-gradient(180deg, var(--surface), var(--surface-2)); border-radius:14px; padding:18px 16px; margin:0; box-shadow:0 8px 22px rgba(0,0,0,.06); }
+.arabic { font-family:"Scheherazade","Scheherazade New","Amiri","Noto Naskh Arabic","Traditional Arabic",serif; font-size:var(--ar-size, 50px); line-height:var(--ar-lh, 1.75); font-weight:700; color:var(--arabic); }
+.translit { font-size:var(--tl-size, 20px); font-style:normal; font-weight:750; color:var(--translit); text-align:center; }
+.translation { font-size:var(--tr-size, 20px); line-height:1.55; font-weight:650; text-align:center; color:var(--translation); }
+.urdu-translation { font-family:"NastaliqUrdu","Noto Nastaliq Urdu","Scheherazade New",serif; font-size:calc(var(--tr-size, 20px) * 1.08); line-height:2.05; }
+.source-row { display:flex; padding:12px 16px; align-items:center; justify-content:center; }
+.source { width:auto; border:0; padding:0; font-size:15px; font-weight:750; color:var(--translation); }
+.source::before { content:"📖  Reference: "; color:var(--accent-2); font-weight:800; }
+.reader.can-scroll .scroll-hint { display:none; }
+.bottombar { gap:22px; padding:10px 20px 18px; }
+.nav-btn { min-width:86px; min-height:70px; border-radius:18px; background:var(--surface-2); border-color:var(--line); font-size:15px; }
+.nav-btn svg { width:32px; height:32px; }
+.progress-wrap { gap:6px; }
+.counter { justify-content:center; font-size:15px; font-weight:800; color:var(--arabic); }
+.progress-track { height:9px; border-radius:99px; background:rgba(127,127,127,.22); }
+.progress-fill { background:var(--progress); }
+.auto-flag { display:none !important; }
+.sheet { border-radius:22px 22px 0 0; background:var(--surface); border-color:var(--line); }
+.sheet-head h2 { font-size:24px; }
+.set-group { border:1px solid var(--line); border-radius:16px; background:var(--surface-2); padding:10px; margin:0 0 12px; }
+.grp-title { color:var(--accent-2); font-weight:850; letter-spacing:.04em; }
+.set-row { min-height:58px; border-bottom:1px solid var(--line); }
+.set-row:last-child { border-bottom:0; }
+.set-row .label .name { font-weight:800; font-size:15px; }
+.set-row .label .desc { font-size:12px; line-height:1.35; }
+.switch .track { width:56px; height:32px; background:rgba(127,127,127,.34); }
+.switch .track::before { width:26px; height:26px; }
+.switch input:checked + .track { background:var(--accent); }
+.switch input:checked + .track::before { transform:translateX(24px); }
+body.easy .arabic { font-size:calc(var(--ar-size, 50px) * 1.08); line-height:1.85; }
+body.easy .translit, body.easy .translation { font-size:calc(var(--tr-size, 20px) * 1.08); }
+body.tv .topbar { padding:36px 48px 12px; }
+body.tv .section-pick .current { font-size:54px; }
+body.tv .prayer-ribbon { margin:0 48px 22px; min-height:68px; font-size:28px; padding:14px 28px; }
+body.tv .stage { padding:0 64px 10px; }
+body.tv .reader { max-width:1460px; }
+body.tv .reader-scroll { gap:22px; }
+body.tv .item-title { font-size:40px; }
+body.tv .arabic { font-size:var(--ar-size, 74px); line-height:1.85; }
+body.tv .translit, body.tv .translation { font-size:30px; }
+body.tv .source { font-size:24px; }
+body.tv .bottombar { padding:12px 64px 36px; }
+body.tv .nav-btn { min-width:170px; min-height:94px; font-size:24px; border-radius:22px; }
+body.tv .counter { font-size:26px; }
+body.tv .progress-track { height:14px; }
+.waqf-mark { display:inline-block; white-space:nowrap; break-inside:avoid; unicode-bidi:isolate; font-size:.58em; line-height:1; vertical-align:super; margin-inline:.08em; color:var(--accent-2); font-family:"Scheherazade","Scheherazade New","Amiri","Noto Naskh Arabic","Traditional Arabic",serif; }
+.waqf-mark.ayah { font-size:.72em; vertical-align:baseline; }
+.waqf-legend { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.waqf-legend div { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.waqf-legend b { min-width:34px; font-size:22px; color:var(--accent-2); text-align:center; font-family:"Scheherazade","Amiri",serif; }
+.waqf-legend span { font-size:12.5px; color:var(--translation); }
+.legend-wrap { width:100%; }
+@media (max-width: 420px) {
+  .topbar { padding-inline:16px; }
+  .prayer-ribbon { margin-inline:16px; }
+  .stage { padding-inline:14px; }
+  .arabic, .translit, .translation, .source-row { padding:15px 12px; border-radius:13px; }
+  .nav-btn { min-width:72px; padding-inline:10px; }
+  .nav-label { display:block; }
+  .waqf-legend { grid-template-columns:1fr; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
+
+
+/* ========================================================================
+   Version 00 Rev A Personal — Tajweed, top PNG Share, Arabic Font Weight
+   ======================================================================== */
+.arabic[data-weight="regular"] { font-weight:400 !important; }
+.arabic[data-weight="thick"] { font-weight:700 !important; }
+
+/* Priority 6: quiet Bismillah header — one small, centered, separated row. */
+.bismillah-row {
+  font-family:"Scheherazade","Amiri",serif;
+  font-size:clamp(15px, calc(var(--ar-size, 30px) * .42), 26px);
+  font-weight:500; line-height:1.6; text-align:center; width:100%;
+  color:var(--accent); opacity:.92; direction:rtl;
+  margin:0 0 14px; padding-bottom:12px;
+  border-bottom:1px solid var(--line);
+}
+body.tv .bismillah-row { margin-bottom:18px; padding-bottom:16px; }
+.bismillah-row.hidden { display:none; }
+
+/* Non-Qur'anic reading flow: each phrase on its own centred line. */
+.arabic .ar-phrase { display:block; }
+.arabic .ar-phrase + .ar-phrase { margin-top:.28em; }
+
+/* On-screen Arabic size control (top bar) */
+.ar-size { display:flex; align-items:center; gap:4px; flex:0 0 auto; }
+.ar-size-btn { width:38px; height:38px; font-weight:700; font-size:15px; letter-spacing:.02em; }
+.ar-size-btn:active { transform:scale(.92); }
+.arabic.tajweed-active { letter-spacing:.01em; }
+.tw-madd { color:color-mix(in srgb, var(--accent) 92%, var(--arabic)); font-weight:inherit; }
+.tw-ghunnah { color:color-mix(in srgb, var(--accent-2) 88%, var(--arabic)); font-weight:inherit; }
+.tw-qalqalah { color:color-mix(in srgb, #d97070 75%, var(--arabic)); font-weight:inherit; }
+.tw-idgham, .tw-ikhfa, .tw-iqlab { font-weight:inherit; }
+.sr-only { position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+.share-btn {
+  border:1px solid color-mix(in srgb, var(--accent) 42%, var(--line));
+  background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 15%, var(--surface-2)), var(--surface));
+  color:var(--accent-2); box-shadow:0 8px 22px rgba(0,0,0,.08); touch-action:manipulation;
+}
+.share-btn svg { width:21px; height:21px; }
+body.no-share .share-btn, body.tv .share-btn { display:none !important; }
+body.easy .share-btn { width:52px; height:52px; }
+body[data-lang="ur"] .source::before { content:"📖  حوالہ: "; }
+
+/* ========================================================================
+   Personal Enhancement 04 — premium cream render, natural Arabic flow,
+   Hajj & Umrah, tablet / TV responsive polish
+   ======================================================================== */
+[data-theme="elder-light"] {
+  --bg:#fbf6eb; --bg-2:#f8efdf; --surface:#fffdf8; --surface-2:#fff8ee; --line:#ead9bd;
+  --arabic:#102d24; --translit:#29322d; --translation:#202a2d; --muted:#7a6f5f;
+  --accent:#667c34; --accent-2:#9b7728; --progress:#667c34; --chip-bg:#fbf6e9; --chip-fg:#364717;
+  --shadow:0 18px 50px rgba(103,80,34,.15); --hero-glow:radial-gradient(90% 55% at 50% -10%, rgba(155,119,40,.16), transparent 66%);
+  --geo-opacity:.09; --on-accent:#fffdf7;
+}
+[data-theme="sepia"] {
+  --bg:#f1e4ca; --bg-2:#ead7b2; --surface:#fff8e8; --surface-2:#f7ecd7; --line:#d6bd8e;
+  --arabic:#2a2116; --translit:#4c3d25; --translation:#30291e; --muted:#786848;
+  --accent:#667c34; --accent-2:#9b7728; --progress:#667c34; --chip-bg:#f6e8c8; --chip-fg:#5d4519;
+  --shadow:0 18px 50px rgba(93,69,25,.18); --hero-glow:radial-gradient(90% 55% at 50% -10%, rgba(155,119,40,.14), transparent 66%);
+  --geo-opacity:.08; --on-accent:#fffdf7;
+}
+[data-theme="dark-ambient"] {
+  --bg:#07100d; --bg-2:#0d1712; --surface:#101c17; --surface-2:#17251e; --line:#334235;
+  --arabic:#f8f0dd; --translit:#e4d4aa; --translation:#edf3ee; --muted:#adb7ac;
+  --accent:#c9a85a; --accent-2:#87a857; --progress:#c9a85a; --chip-bg:#17251e; --chip-fg:#ead6a1;
+  --shadow:0 20px 60px rgba(0,0,0,.42); --hero-glow:radial-gradient(90% 55% at 50% -10%, rgba(201,168,90,.14), transparent 66%);
+  --geo-opacity:.055; --on-accent:#07100d;
+}
+html, body { overflow:hidden; }
+body {
+  background:
+    radial-gradient(70% 50% at 50% 0%, rgba(255,255,255,.46), transparent 62%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+}
+.bg-geometry { opacity:var(--geo-opacity); color:var(--accent-2); }
+#app { padding:env(safe-area-inset-top) clamp(12px, 3.6vw, 56px) env(safe-area-inset-bottom); }
+.topbar {
+  padding:clamp(14px, 3vw, 30px) 0 10px; gap:12px; align-items:center;
+}
+.brand-mark { display:grid !important; width:42px; height:42px; }
+.brand-mark svg { width:42px; height:42px; }
+.section-pick { min-width:0; padding:2px 0; }
+.section-pick .current {
+  font-family:"ReemKufi", "Segoe UI", sans-serif; font-size:clamp(30px, 7vw, 52px); line-height:1.08;
+  color:var(--arabic); font-weight:800; letter-spacing:-.025em;
+}
+.ar-size {
+  border:1px solid var(--line); border-radius:18px; overflow:hidden; background:rgba(255,255,255,.38);
+  box-shadow:0 10px 24px rgba(103,80,34,.08);
+}
+.ar-size-btn { width:56px; height:48px; border-radius:0; color:var(--arabic); font-size:20px; background:transparent; }
+.ar-size-btn + .ar-size-btn { border-left:1px solid var(--line); }
+.icon-btn {
+  width:54px; height:54px; border-radius:18px; border:1px solid var(--line);
+  background:rgba(255,253,248,.65); color:var(--arabic); box-shadow:0 10px 24px rgba(103,80,34,.08);
+}
+.icon-btn.ghost { color:var(--accent-2); }
+.share-btn { order:5; }
+body.no-share .share-btn { display:none !important; }
+.prayer-ribbon {
+  margin:8px 0 18px; min-height:80px; border-radius:28px; padding:12px clamp(18px, 4vw, 38px);
+  background:rgba(255,253,248,.78); border:1px solid var(--line); box-shadow:0 16px 34px rgba(103,80,34,.12);
+  font-size:clamp(18px, 4vw, 28px); color:var(--translation); gap:16px;
+}
+.prayer-ribbon::before {
+  content:"🕌"; width:58px; height:58px; border-radius:50%; display:grid; place-items:center; flex:0 0 auto;
+  background:linear-gradient(135deg, var(--accent), #81934d); color:#fff; font-size:28px;
+}
+.prayer-ribbon .next { color:var(--accent); font-family:"ReemKufi", sans-serif; font-weight:800; font-size:1.12em; }
+#prayerCity::before { content:"⌖"; margin-inline:10px 6px; color:var(--accent-2); }
+.prayer-ribbon .dot { width:8px; height:8px; background:var(--accent); opacity:.85; }
+.prayer-ribbon .approx {
+  display:inline-flex !important; align-items:center; min-height:28px; border-radius:999px; padding:3px 14px;
+  background:rgba(102,124,52,.12); border:1px solid rgba(102,124,52,.22); color:var(--accent); font-size:14px;
+  letter-spacing:.04em; font-weight:800; text-transform:uppercase;
+}
+.prayer-ribbon .time { font-size:1.18em; color:var(--arabic); font-weight:800; margin-left:auto; }
+.stage { padding:0; min-height:0; }
+.reader {
+  max-width:920px; background:transparent !important; border:none !important; box-shadow:none !important; border-radius:0; overflow:visible;
+}
+.reader-scroll {
+  padding:0 2px 6px !important; gap:14px; overflow-y:auto; overflow-x:hidden;
+  display:flex !important; flex-direction:column !important; justify-content:flex-start !important;
+}
+.bismillah-row {
+  order:0; position:relative; color:#392f13 !important; opacity:1; font-weight:700; text-align:center; width:100%;
+  font-size:clamp(32px, calc(var(--ar-size, 50px) * .78), 52px); line-height:1.55;
+  padding:16px 48px 22px; margin:2px 0 4px; border:0; text-shadow:0 1px 0 rgba(255,255,255,.55);
+}
+.bismillah-row::before, .bismillah-row::after {
+  content:""; position:absolute; top:50%; width:24%; height:1px; background:linear-gradient(90deg, transparent, var(--line), var(--accent-2));
+}
+.bismillah-row::before { left:0; }
+.bismillah-row::after { right:0; transform:scaleX(-1); }
+.bismillah-row[data-bismillah-size="normal"] { font-size:clamp(26px, calc(var(--ar-size, 50px) * .62), 42px); }
+.bismillah-row[data-bismillah-size="xl"] { font-size:clamp(38px, calc(var(--ar-size, 50px) * .92), 62px); }
+.bismillah-row[data-bismillah-color="gold"] { color:#8a641f !important; }
+.bismillah-row[data-bismillah-color="dark"] { color:#142d22 !important; }
+.item-title {
+  order:1; font-family:"ReemKufi", "Segoe UI", sans-serif; font-size:clamp(28px, 6vw, 44px); line-height:1.15;
+  color:var(--arabic); margin:0 0 2px; font-weight:800;
+}
+.meta-row {
+  order:2; display:flex !important; position:relative !important; top:auto !important; margin:0 !important; padding:0 0 8px !important;
+  background:transparent !important; border:0 !important; backdrop-filter:none !important; gap:10px; flex-wrap:wrap;
+}
+.chip, .flow-tag, .verify {
+  min-height:44px; display:inline-flex; align-items:center; padding:8px 18px; border-radius:999px;
+  background:rgba(255,253,248,.72); border:1px solid var(--line); box-shadow:0 8px 20px rgba(103,80,34,.07);
+  color:var(--chip-fg); text-transform:none; letter-spacing:0; font-size:clamp(14px, 3.2vw, 18px); font-weight:750;
+}
+.verify { margin-left:0; color:var(--accent); }
+.copy-btn { margin-left:auto; background:rgba(255,253,248,.72); }
+.arabic {
+  order:3; direction:rtl; unicode-bidi:plaintext; text-align:center !important; white-space:normal !important;
+  word-break:keep-all !important; overflow-wrap:normal !important; hyphens:none;
+  font-family:"Scheherazade", "Amiri", serif; font-size:var(--ar-size, 48px); line-height:var(--ar-lh, 1.92);
+  color:#111b1d; font-weight:600; border-radius:28px; padding:26px 26px !important;
+  background:rgba(255,253,248,.88); border:1px solid var(--line); box-shadow:0 18px 34px rgba(103,80,34,.10); text-shadow:none;
+}
+body[data-theme="dark-ambient"] .arabic { color:var(--arabic); background:rgba(16,28,23,.86); }
+.arabic .ar-phrase { display:inline !important; }
+.arabic .ar-phrase + .ar-phrase { margin-top:0 !important; }
+.pause-symbol { display:inline; margin-inline:.04em; color:var(--accent-2); }
+.waqf-mark { color:var(--accent-2); font-weight:700; }
+.side-zone { order:4; display:flex !important; flex-direction:column; gap:14px; }
+.translit, .translation, .source-row {
+  border-radius:24px; padding:20px 24px !important; margin:0; background:rgba(255,253,248,.78);
+  border:1px solid var(--line); box-shadow:0 12px 28px rgba(103,80,34,.08); color:var(--translation);
+}
+.translit { font-size:clamp(17px, 4vw, 24px); line-height:1.35; text-align:left; font-weight:650; color:#182528; }
+.translation { font-size:clamp(17px, 4vw, 24px); line-height:1.38; text-align:left; font-weight:650; max-width:none; }
+.urdu-translation { text-align:right; font-family:"NastaliqUrdu", "Scheherazade", serif; line-height:2.05; }
+.source-row { justify-content:center; }
+.source::before { color:var(--accent-2); }
+.bottombar {
+  width:100%; max-width:920px; margin-inline:auto; padding:10px 0 calc(16px + env(safe-area-inset-bottom)); gap:14px;
+}
+.nav-btn {
+  min-width:116px; min-height:76px; border-radius:22px; background:rgba(255,253,248,.78);
+  color:#101820; border:1px solid var(--line); font-size:18px; font-weight:800; box-shadow:0 12px 26px rgba(103,80,34,.10);
+}
+.nav-label { display:inline; }
+.progress-wrap { max-width:360px; align-items:center; }
+.progress-track { height:12px; width:100%; border-radius:999px; background:#efe5d3; }
+.counter { justify-content:center; font-size:22px; color:var(--arabic); font-weight:900; }
+body.hide-progress .progress-track, body.hide-progress .counter { display:none !important; }
+body.hide-progress .progress-wrap { max-width:20px; }
+.sheet#settingsSheet {
+  left:0; right:0; top:0; bottom:0; width:auto; max-width:none; max-height:none; border-radius:0; transform:translateY(102%);
+  background:var(--bg); border:0; padding:env(safe-area-inset-top) clamp(18px, 4vw, 44px) env(safe-area-inset-bottom);
+}
+.sheet#settingsSheet.open { transform:translateY(0); }
+#settingsSheet .sheet-grab { display:none; }
+#settingsSheet .sheet-head { padding:20px 0 18px; border:0; gap:16px; }
+#settingsSheet .sheet-head .icon-btn { order:-1; }
+#settingsSheet .sheet-head h2 {
+  font-family:"ReemKufi", sans-serif; font-size:clamp(34px, 7vw, 52px); font-weight:800; color:var(--arabic);
+}
+#settingsSheet .sheet-head h2::after {
+  content:"Reading, categories, and personalization"; display:block; font-family:"Segoe UI", system-ui, sans-serif;
+  color:var(--muted); font-size:clamp(15px, 3vw, 20px); font-weight:500; letter-spacing:0; margin-top:3px;
+}
+#settingsBody {
+  display:grid; grid-template-columns:1fr; gap:16px; padding:0 0 18px; overflow-y:auto;
+}
+.set-group {
+  padding:18px; border:1px solid var(--line); border-radius:24px; background:rgba(255,253,248,.76); box-shadow:0 14px 30px rgba(103,80,34,.08);
+}
+.set-group > .grp-title {
+  color:var(--arabic); font-family:"ReemKufi", sans-serif; font-size:clamp(20px, 4.2vw, 30px);
+  letter-spacing:0; text-transform:none; font-weight:800; margin:0 0 14px;
+}
+.set-row { min-height:62px; padding:12px 0; border-bottom:1px solid rgba(214,189,142,.48); gap:18px; }
+.set-row .label .name { font-size:17px; color:#0c1717; font-weight:800; }
+.set-row .label .desc { font-size:14px; color:var(--muted); line-height:1.35; }
+.theme-grid { grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px; }
+.theme-card { background:rgba(255,253,248,.72); border:1px solid var(--line); border-radius:18px; min-height:110px; align-items:center; text-align:center; }
+.theme-card.active { border-color:var(--accent); box-shadow:0 0 0 3px rgba(102,124,52,.18) inset; }
+.theme-card .swatch { width:54px; height:54px; border-radius:50%; }
+.theme-card .tname { font-size:15px; color:var(--arabic); font-weight:700; }
+.seg button, .stepper button, .set-select, .btn-about {
+  background:rgba(255,253,248,.78); border:1px solid var(--line); color:var(--translation); border-radius:16px;
+}
+.seg button.active { background:rgba(102,124,52,.14); border-color:var(--accent); color:var(--accent); font-weight:900; }
+.switch { width:58px; height:34px; }
+.switch .track { background:#eadfc9; border-color:var(--line); }
+.switch .track::after { background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.18); }
+.switch input:checked + .track { background:var(--accent); }
+.switch input:checked + .track::after { background:#fff; transform:translateX(24px); }
+.cat-chip-grid { display:flex; flex-wrap:wrap; gap:12px; width:100%; }
+.settings-cat-chip {
+  position:relative; min-height:52px; padding:0 18px; border-radius:18px; border:1px solid var(--line);
+  background:rgba(255,253,248,.78); color:#182528; font-size:16px; font-weight:800;
+}
+.settings-cat-chip.is-new { padding-right:70px; }
+.settings-cat-chip[data-new]::after {
+  content:attr(data-new); position:absolute; right:12px; top:50%; transform:translateY(-50%); border-radius:10px;
+  background:linear-gradient(180deg, #b98b28, #8e6818); color:white; font-size:12px; padding:4px 8px;
+}
+.loc-note { color:var(--accent); background:rgba(102,124,52,.12); border-color:rgba(102,124,52,.22); font-weight:800; }
+.sheet-foot { background:linear-gradient(180deg, transparent, var(--bg) 30%); border:0; padding:10px 0 18px; }
+.btn-apply {
+  min-height:72px; border-radius:24px; font-family:"ReemKufi", sans-serif; font-size:clamp(24px, 5vw, 34px);
+  background:linear-gradient(135deg, #586d2c, #859949); color:white; box-shadow:0 18px 36px rgba(88,109,44,.28);
+}
+@media (min-width: 760px) {
+  .reader { max-width:min(1000px, 92vw); }
+  #settingsBody { grid-template-columns:1fr 1fr; align-items:start; }
+  #settingsBody .set-group:nth-child(3), #settingsBody .set-group:nth-child(6) { grid-column:1 / -1; }
+}
+@media (min-width: 1100px) {
+  #app { padding-inline:64px; }
+  .reader { max-width:min(1260px, 86vw); }
+  .reader-scroll { gap:18px; }
+  .side-zone { display:grid !important; grid-template-columns:1fr 1fr; }
+  .source-row { grid-column:1 / -1; }
+}
+body.tv #app { padding:26px 64px 30px; }
+body.tv .topbar { padding:0 0 20px; }
+body.tv .brand-mark, body.tv .brand-mark svg { width:70px; height:70px; }
+body.tv .section-pick .current { font-size:64px; }
+body.tv .icon-btn { width:78px; height:78px; border-radius:24px; }
+body.tv .ar-size-btn { width:82px; height:72px; font-size:28px; }
+body.tv .prayer-ribbon { min-height:92px; margin-bottom:26px; font-size:32px; }
+body.tv .reader { max-width:1600px; }
+body.tv .bismillah-row { font-size:60px; padding-block:14px 26px; }
+body.tv .item-title { font-size:52px; }
+body.tv .chip, body.tv .flow-tag, body.tv .verify { min-height:58px; font-size:24px; padding-inline:26px; }
+body.tv .arabic { font-size:var(--ar-size, 78px); line-height:1.82; padding:32px 44px !important; }
+body.tv .translit, body.tv .translation { font-size:30px; line-height:1.45; }
+body.tv .bottombar { max-width:1600px; padding-top:24px; }
+body.tv .nav-btn { min-width:220px; min-height:104px; font-size:28px; }
+body.tv .counter { font-size:32px; }
+body.tv .progress-track { height:16px; }
+body.tv #settingsSheet { padding:34px 54px; }
+body.tv #settingsBody { grid-template-columns:1fr 1fr; gap:22px; }
+body.tv .set-group { border-radius:28px; padding:22px; }
+body.tv .set-row .label .name { font-size:24px; }
+body.tv .set-row .label .desc { font-size:18px; }
+body.tv :focus, body.tv :focus-visible, body.tv .tv-focus {
+  outline:5px solid var(--accent-2) !important; outline-offset:5px !important;
+  box-shadow:0 0 0 8px rgba(155,119,40,.22), 0 0 34px rgba(155,119,40,.34) !important;
+}
+@media (max-width: 430px) {
+  #app { padding-inline:14px; }
+  .topbar { gap:8px; }
+  .brand-mark { width:36px; height:36px; }
+  .brand-mark svg { width:36px; height:36px; }
+  .section-pick .current { font-size:30px; }
+  .ar-size-btn { width:44px; height:44px; font-size:18px; }
+  .icon-btn { width:48px; height:48px; }
+  .prayer-ribbon { min-height:66px; padding-inline:14px; gap:9px; font-size:18px; border-radius:22px; }
+  .prayer-ribbon::before { width:48px; height:48px; font-size:24px; }
+  .prayer-ribbon .approx { font-size:12px; padding-inline:10px; }
+  .bismillah-row { padding-inline:34px; font-size:32px; }
+  .arabic { font-size:var(--ar-size, 38px); padding:20px 16px !important; line-height:1.85; }
+  .translit, .translation { font-size:18px; padding:18px !important; }
+  .nav-btn { min-width:94px; min-height:72px; font-size:16px; }
+  .progress-wrap { max-width:150px; }
+  .counter { font-size:20px; }
+  #settingsSheet { padding-inline:18px; }
+  .set-row { flex-wrap:wrap; }
+  .seg, .stepper { width:100%; justify-content:flex-end; }
+}
+
+/* ========================================================================
+   Rev A Personal Enhancement04 — Overlap Fix Pass 10-Jun-2026
+   Purpose: prevent header, prayer bar, settings rows, and save bar overlap
+   on 390 px mobile, tablet, and Android TV preview/device layouts.
+   ======================================================================== */
+html, body { height:100%; min-height:100%; }
+#app { height:100dvh; max-height:100dvh; overflow:hidden; }
+.topbar {
+  width:100%; max-width:920px; margin-inline:auto;
+  display:flex; align-items:center; flex-wrap:nowrap; min-width:0;
+}
+.section-pick { flex:1 1 auto; min-width:0; overflow:hidden; }
+.section-pick .current { min-width:0; max-width:100%; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ar-size { flex:0 0 auto; display:flex; }
+.ar-size-btn { flex:0 0 auto; }
+.icon-btn { flex:0 0 auto; }
+.prayer-ribbon { width:auto; max-width:920px; margin-left:auto; margin-right:auto; min-width:0; overflow:hidden; }
+.prayer-ribbon > * { flex:0 0 auto; white-space:nowrap; }
+#prayerCity { min-width:0; max-width:clamp(58px, 22vw, 180px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.prayer-ribbon .next { min-width:0; max-width:clamp(78px, 28vw, 220px); overflow:hidden; text-overflow:ellipsis; }
+.prayer-ribbon .time { margin-left:auto; }
+.reader-scroll { min-height:0; }
+.side-zone { min-width:0; }
+.translit, .translation { overflow-wrap:break-word; }
+.bottombar { flex:0 0 auto; }
+.progress-wrap { min-width:70px; }
+
+/* Settings sheet must reserve space for Save & Apply instead of letting it cover rows. */
+.sheet#settingsSheet { display:flex; flex-direction:column; overflow:hidden; }
+#settingsSheet .sheet-head { flex:0 0 auto; }
+#settingsBody {
+  flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden;
+  padding-bottom:24px; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+}
+#settingsSheet .sheet-foot { flex:0 0 auto; position:relative; z-index:3; }
+.set-group { min-width:0; overflow:hidden; }
+.set-row { min-width:0; }
+.set-row .label { min-width:0; }
+.set-row .label .name, .set-row .label .desc { overflow-wrap:anywhere; }
+.seg, .stepper, .cat-chip-grid { min-width:0; }
+.switch { flex:0 0 auto; position:relative; display:inline-block; }
+.switch .track { position:absolute; inset:0; width:100%; height:100%; display:block; }
+.switch .track::after { top:3px; left:3px; width:26px; height:26px; }
+.switch input:checked + .track::after { transform:translateX(24px); }
+
+/* Compact mobile controls: no overlapping title, no hidden settings access. */
+@media (max-width: 560px) {
+  #app { padding-inline:12px; }
+  .topbar { padding:18px 0 10px; gap:6px; max-width:100%; }
+  .section-pick .current { font-size:clamp(22px, 6.2vw, 26px); line-height:1.08; }
+  .ar-size { gap:2px; }
+  .ar-size-btn { width:36px; height:40px; font-size:15px; border-radius:14px; padding:0; }
+  .icon-btn { width:42px; height:42px; border-radius:15px; padding:0; }
+  .share-btn { display:none !important; }
+  .prayer-ribbon { margin:0 0 10px; min-height:58px; padding:10px 12px; gap:8px; font-size:15px; border-radius:20px; }
+  .prayer-ribbon::before { width:42px; height:42px; font-size:20px; margin-inline-end:4px; }
+  .prayer-ribbon .next { font-size:18px; max-width:104px; }
+  #prayerCity { max-width:58px; }
+  .prayer-ribbon .time { font-size:20px; }
+  .stage { padding:0; min-height:0; }
+  .reader { max-width:100%; }
+  .reader-scroll { max-height:none; gap:12px; }
+  .bismillah-row { font-size:clamp(28px, 8vw, 34px); margin-bottom:10px; padding:6px 12px 14px; }
+  .item-title { font-size:clamp(23px, 7vw, 31px); line-height:1.15; }
+  .meta-row { gap:8px; }
+  .chip, .flow-tag, .verify { min-height:34px; padding:6px 12px; font-size:12px; }
+  .arabic { font-size:var(--ar-size, 36px); line-height:1.92; padding:18px 14px !important; border-radius:22px; }
+  .side-zone { gap:10px; }
+  .translit, .translation { font-size:16px; line-height:1.34; padding:14px 16px !important; border-radius:18px; }
+  .source-row { padding:10px 14px !important; }
+  .bottombar { max-width:100%; padding:10px 0 calc(14px + env(safe-area-inset-bottom)); gap:10px; }
+  .nav-btn { min-width:86px; min-height:64px; padding:0 10px; font-size:15px; border-radius:18px; }
+  .nav-btn svg { width:22px; height:22px; }
+  .progress-wrap { max-width:128px; min-width:80px; }
+  .progress-track { height:9px; }
+  .counter { font-size:18px; }
+
+  #settingsSheet { padding-inline:16px; }
+  #settingsSheet .sheet-head { padding:14px 0 12px; }
+  #settingsSheet .sheet-head h2 { font-size:clamp(32px, 9vw, 42px); line-height:1.05; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  #settingsSheet .sheet-head h2::after { font-size:14px; white-space:normal; line-height:1.25; }
+  #settingsBody { display:block; padding-bottom:12px; }
+  .set-group { padding:16px; border-radius:22px; margin:0 0 14px; }
+  .set-group > .grp-title { font-size:clamp(21px, 6vw, 27px); line-height:1.15; }
+  .set-row { flex-wrap:nowrap !important; gap:12px; min-height:56px; padding:10px 0; }
+  .set-row .label .name { font-size:15.5px; line-height:1.25; }
+  .set-row .label .desc { font-size:12.5px; line-height:1.28; }
+  .seg, .stepper { width:auto; justify-content:flex-end; flex:0 0 auto; }
+  .seg button { padding:8px 10px; font-size:12px; border-radius:12px; }
+  .stepper button { width:34px; height:34px; font-size:18px; }
+  .stepper .val { min-width:46px; font-size:12px; }
+  .switch { width:52px; height:30px; }
+  .switch .track::after { width:24px; height:24px; }
+  .switch input:checked + .track::after { transform:translateX(22px); }
+  .theme-grid { grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; }
+  .theme-card { min-height:88px; padding:8px 6px; border-radius:16px; }
+  .theme-card .swatch { width:40px; height:40px; }
+  .theme-card .tname { font-size:12px; line-height:1.15; }
+  .settings-cat-chip { min-height:42px; padding:0 12px; font-size:13px; border-radius:14px; }
+  .settings-cat-chip.is-new { padding-right:56px; }
+  .settings-cat-chip[data-new]::after { right:8px; font-size:10px; padding:3px 6px; }
+  #settingsSheet .sheet-foot { padding:8px 0 14px; }
+  .btn-apply { min-height:60px; border-radius:20px; font-size:clamp(23px, 6.4vw, 30px); }
+}
+
+@media (min-width: 561px) and (max-width: 900px) {
+  #app { padding-inline:28px; }
+  .topbar, .prayer-ribbon, .bottombar { max-width:min(900px, 100%); }
+  .section-pick .current { font-size:clamp(30px, 5vw, 42px); }
+  .reader { max-width:min(900px, 100%); }
+  #settingsBody { grid-template-columns:1fr 1fr; gap:16px; }
+}
+
+@media (min-width: 901px) {
+  .topbar, .prayer-ribbon, .bottombar { max-width:min(1500px, 100%); }
+}
+
+/* ===================================================================
+   TV REFINEMENT PASS — compact 10-foot sizing, single-column hero
+   reader, all-in-one settings grid, strong remote focus ring.
+   =================================================================== */
+body.tv { font-size:15px; }
+body.tv .topbar { padding:22px 48px 8px; gap:16px; }
+body.tv .section-pick .current { font-size:21px; }
+body.tv .icon-btn { width:46px; height:46px; }
+body.tv .icon-btn svg { width:23px; height:23px; }
+body.tv .prayer-ribbon { margin:6px 48px 0; font-size:16px; padding:10px 22px; }
+body.tv .stage { padding:14px 48px 6px; }
+body.tv .reader { max-width:1280px; border-radius:24px; }
+body.tv .bottombar { padding:12px 48px 26px; gap:18px; }
+body.tv .nav-btn { min-height:0; font-size:18px; padding:14px 26px; border-width:2px; }
+body.tv.easy .nav-btn { min-height:0; font-size:19px; padding:16px 28px; }
+body.tv .nav-btn svg { width:26px; height:26px; }
+body.tv .item-title { font-size:24px; }
+body.tv .translit { font-size:calc(var(--tl-size, 17px) * 1.04); }
+body.tv .translation { font-size:calc(var(--tr-size, 17px) * 1.04); line-height:1.7; }
+
+/* Single-column hero reader (replaces the cramped two-column grid) */
+body.tv .reader-scroll {
+  display:flex !important; flex-direction:column; align-items:stretch;
+  grid-template-columns:none; grid-template-areas:none;
+  gap:16px; padding:24px 80px 22px; text-align:center;
+}
+body.tv .reader-scroll .meta-row {
+  position:sticky; top:0; z-index:3; background:var(--surface); justify-content:center;
+  padding:2px 0 10px; margin:0; border-bottom:1px solid var(--line); min-height:0;
+}
+body.tv .reader-scroll .item-title { align-self:center; text-align:center; }
+body.tv .reader-scroll .arabic {
+  align-self:stretch; width:100%; text-align:center; border:none; background:transparent;
+}
+body.tv .reader-scroll .side-zone {
+  align-self:center; max-width:1040px; border-left:none; padding-left:0;
+  display:flex; flex-direction:column; gap:12px; align-items:center;
+}
+body.tv .reader-scroll .translit,
+body.tv .reader-scroll .translation { text-align:center; }
+body.tv .reader-scroll .source-row { justify-content:center; }
+
+/* All-in-one settings: full-screen grid of cards instead of a tall side sheet */
+body.tv #settingsSheet {
+  left:0; right:0; top:0; bottom:0; width:100%; max-width:100%;
+  border-radius:0; border-left:none;
+}
+body.tv #settingsSheet .sheet-body {
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;
+  padding:16px 40px 8px; align-content:start;
+}
+body.tv #settingsSheet .set-group {
+  background:var(--surface-2); border:1px solid var(--line); border-radius:18px;
+  padding:14px 20px 8px; margin:0;
+}
+body.tv #settingsSheet .set-group > .grp-title { font-size:13px; }
+body.tv #settingsSheet .set-row { padding:9px 0; }
+body.tv #settingsSheet .set-row .label .name { font-size:16px; }
+body.tv #settingsSheet .set-row .label .desc { font-size:12.5px; }
+body.tv #settingsSheet .sheet-head h2 { font-size:24px; }
+body.tv #settingsSheet .seg button { font-size:14px; padding:8px 12px; }
+
+/* Strong, unmistakable D-pad focus ring (used by the in-sheet roving nav) */
+body.tv .tv-focus {
+  outline:4px solid var(--accent) !important; outline-offset:3px; border-radius:14px;
+  box-shadow:0 0 0 6px color-mix(in srgb, var(--accent) 38%, transparent) !important;
+}
+
+/* ===================================================================
+   AURORA enhancement pass — futuristic dark concept made real.
+   Scoped to the Aurora (dark-ambient) theme so other themes are intact.
+   =================================================================== */
+[data-theme="dark-ambient"] { --accent-3:#b69cff; }
+
+/* Glowing gold Arabic centrepiece */
+[data-theme="dark-ambient"] .arabic {
+  color:#f4d79a;
+  text-shadow:0 0 32px rgba(244,210,150,.30), 0 1px 0 rgba(0,0,0,.25);
+}
+/* Bismillah header — luminous, centred, always visible on each item */
+[data-theme="dark-ambient"] .bismillah-row {
+  color:#f1d18a; text-align:center;
+  text-shadow:0 0 22px rgba(241,209,138,.28);
+}
+
+/* Luminous accent divider under the Arabic (teal -> violet) */
+[data-theme="dark-ambient"] .reader-scroll .translit {
+  position:relative; border-top:none; padding-top:clamp(20px, 2.6vw, 28px);
+}
+[data-theme="dark-ambient"] .reader-scroll .translit::before {
+  content:""; position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:min(46%, 360px); height:2px; border-radius:2px;
+  background:linear-gradient(90deg, transparent, var(--accent-2), var(--accent-3), transparent);
+  opacity:.85;
+}
+[data-theme="dark-ambient"] .translit { color:#7fe0c8; letter-spacing:.03em; }
+[data-theme="dark-ambient"] .translation { color:#d8e2f2; }
+[data-theme="dark-ambient"] .translation.ur, [data-theme="dark-ambient"] .urdu { color:#e6ecf7; }
+
+/* Glassy pill navigation */
+[data-theme="dark-ambient"] .nav-btn {
+  border-radius:16px;
+  background:color-mix(in srgb, var(--surface-2) 60%, transparent);
+  border:1px solid color-mix(in srgb, var(--accent-2) 26%, var(--line));
+}
+[data-theme="dark-ambient"] #nextBtn {
+  color:var(--on-accent); border:none;
+  background:linear-gradient(145deg, var(--accent-2), #9fd8ff);
+  box-shadow:0 0 26px color-mix(in srgb, var(--accent-2) 32%, transparent);
+}
+[data-theme="dark-ambient"] .progress-fill, [data-theme="dark-ambient"] .progress-track > * {
+  background:linear-gradient(90deg, var(--accent-2), var(--accent-3)) !important;
+}
+
+/* Settings cards (all-in-one grid) get the glass treatment on every surface */
+[data-theme="dark-ambient"] #settingsSheet .set-group {
+  background:color-mix(in srgb, var(--surface-2) 55%, transparent);
+  border:1px solid color-mix(in srgb, var(--accent-2) 16%, var(--line));
+  backdrop-filter:blur(14px) saturate(1.1); -webkit-backdrop-filter:blur(14px) saturate(1.1);
+}
+
+/* ===================================================================
+   Rev C — tags-off default, counter near title, mobile swipe nav,
+   tighter TV layout with larger Arabic.
+   =================================================================== */
+/* Tags hidden on the reading card unless enabled in Settings */
+body:not(.show-tags) .reader-scroll .meta-row { display:none !important; }
+
+/* Counter beside the title */
+.top-counter {
+  font-size:clamp(12px,1.4vw,15px); font-weight:500; letter-spacing:.02em;
+  color:var(--muted); padding:3px 10px; border-radius:999px;
+  background:color-mix(in srgb, var(--accent-2) 12%, transparent);
+  border:1px solid color-mix(in srgb, var(--accent-2) 22%, var(--line));
+  white-space:nowrap; margin-inline-start:2px;
+}
+[data-theme="dark-ambient"] .top-counter { color:#bfe9ff; }
+body.tv .top-counter { font-size:18px; padding:5px 14px; }
+
+/* Mobile: swipe navigates, so the Previous/Next buttons are removed from the bar */
+body:not(.tv) .bottombar .nav-btn { display:none !important; }
+body:not(.tv) .bottombar { justify-content:center; gap:0; }
+body:not(.tv) .bottombar .progress-wrap { flex:1; max-width:560px; }
+
+/* TV: smaller, cleaner Previous/Next; clear focus retained */
+body.tv .bottombar .nav-btn { min-height:0; font-size:16px; padding:10px 18px; gap:6px; }
+body.tv .bottombar .nav-btn svg { width:20px; height:20px; }
+body.tv .bottombar { padding:10px 48px 22px; gap:14px; }
+
+/* TV: use the space — bigger Arabic, tighter chrome, fuller card */
+body.tv .stage { padding:8px 40px 4px; }
+body.tv .reader { max-width:1500px; }
+body.tv .reader-scroll { padding:22px 70px 18px; gap:14px; }
+body.tv .reader-scroll .arabic { font-size:clamp(34px, 4.4vw, 60px); line-height:1.9; }
+body.tv .prayer-ribbon { min-height:42px; }
